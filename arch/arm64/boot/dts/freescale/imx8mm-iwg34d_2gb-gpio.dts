@@ -1,0 +1,87 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (C) 2020 iWave System Technologies Pvt Ltd.
+ */
+
+/dts-v1/;
+
+#include "imx8mm-iwg34d_2gb.dts"
+
+/ {
+	 sound-spdif {
+                compatible = "fsl,imx-audio-spdif";
+                model = "imx-spdif";
+                spdif-controller = <&spdif1>;
+                spdif-out;
+                spdif-in;
+        };
+	
+	gpio { /* GPIO: Setting Unused GPIOs as input pins */
+                compatible = "iwave,unused-gpios";
+                pinctrl-names = "default";
+                pinctrl-0 = <&gpio_used>;
+                status = "okay";
+	};
+};
+
+&iomuxc {
+        pinctrl-names = "default";
+
+        imx8mm-iwg34m {
+			pinctrl_sai1: sai1grp {
+		                fsl,pins = <
+                		        MX8MM_IOMUXC_SAI1_MCLK_SAI1_MCLK        0xd6
+			                MX8MM_IOMUXC_SAI1_RXFS_SAI1_RX_SYNC     0xd6
+					MX8MM_IOMUXC_SAI1_TXFS_SAI1_TX_SYNC     0xd6
+					>;
+       				};
+
+			gpio_used: gpio_used {
+	                        fsl,pins = <
+        	                        /* GPIO: Unused GPIO IOMUX Pin Configuration */
+                	                MX8MM_IOMUXC_GPIO1_IO00_GPIO1_IO0       0x41
+					>;
+				};
+			pinctrl_spdif1: spdif1grp {
+          		      fsl,pins = <
+                       			MX8MM_IOMUXC_SPDIF_TX_SPDIF1_OUT       		  0xd6
+		                        MX8MM_IOMUXC_SPDIF_RX_SPDIF1_IN        		  0xd6
+		                        MX8MM_IOMUXC_SPDIF_EXT_CLK_SPDIF1_EXT_CLK         0xd6
+                			>;
+			        };
+			};
+};
+
+&sai1 {
+        pinctrl-names = "default", "dsd";
+        pinctrl-0 = <&pinctrl_sai1>;
+        assigned-clocks = <&clk IMX8MM_CLK_SAI1>;
+        assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+        assigned-clock-rates = <49152000>;
+        clocks = <&clk IMX8MM_CLK_SAI1_IPG>, <&clk IMX8MM_CLK_DUMMY>,
+                <&clk IMX8MM_CLK_SAI1_ROOT>, <&clk IMX8MM_CLK_DUMMY>,
+                <&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_AUDIO_PLL1_OUT>,
+                <&clk IMX8MM_AUDIO_PLL2_OUT>;
+        clock-names = "bus", "mclk0", "mclk1", "mclk2", "mclk3", "pll8k", "pll11k";
+        fsl,sai-multi-lane;
+        fsl,dataline,dsd = <0 0xff 0xff 2 0xff 0x11>;
+        dmas = <&sdma2 0 25 0>, <&sdma2 1 25 0>;
+        status = "okay";
+};
+
+&spdif1 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_spdif1>;
+        assigned-clocks = <&clk IMX8MM_CLK_SPDIF1>;
+        assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+        assigned-clock-rates = <24576000>;
+        clocks = <&clk IMX8MM_CLK_AUDIO_AHB>, <&clk IMX8MM_CLK_24M>,
+                <&clk IMX8MM_CLK_SPDIF1>, <&clk IMX8MM_CLK_DUMMY>,
+                <&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_CLK_DUMMY>,
+                <&clk IMX8MM_CLK_AUDIO_AHB>, <&clk IMX8MM_CLK_DUMMY>,
+                <&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_CLK_DUMMY>,
+                <&clk IMX8MM_AUDIO_PLL1_OUT>, <&clk IMX8MM_AUDIO_PLL2_OUT>;
+        clock-names = "core", "rxtx0", "rxtx1", "rxtx2", "rxtx3",
+                "rxtx4", "rxtx5", "rxtx6", "rxtx7", "spba", "pll8k", "pll11k";
+        status = "okay";
+};
